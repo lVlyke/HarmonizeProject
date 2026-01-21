@@ -157,7 +157,7 @@ def register():
     print("INFO: You have 60 seconds to press the large button on the bridge! Checking for button press every 5 seconds.")
     attempts = 1
     while attempts < 12:
-        r = requests.post(("http://%s/api" % (hueip)), json.dumps(payload))
+        r = requests.post(("https://%s/api" % (hueip)), json.dumps(payload), verify=False)
         bridgeresponse = json.loads(r.text)
         if  'error' in bridgeresponse[0]:
             print("WARNING {}: {}".format(attempts, bridgeresponse[0]['error']['description']))
@@ -185,7 +185,7 @@ if hueip is None:
     sys.exit("ERROR: Hue bridge not found. Please ensure proper network connectivity and power connection to the hue bridge.")
 verbose("INFO: Hue bridge located at:", hueip)
 
-baseurl = "http://{}/api".format(hueip)
+baseurl = "https://{}/api".format(hueip)
 clientdata = []
 
 verbose("Checking whether Harmonizer application is already registered (Looking for client.json file).")
@@ -197,7 +197,7 @@ if Path("./client.json").is_file():
     f.close()
     verbose("INFO: Client data found from client.json file.")
     setupurl = baseurl + "/" + clientdata['username']
-    r = requests.get(url = setupurl)
+    r = requests.get(url = setupurl, verify=False)
     setupresponse = dict()
     setupresponse = json.loads(r.text)
     if  setupresponse.get('error'):
@@ -209,7 +209,7 @@ else:
     register()
 
 verbose("Requesting bridge information...") 
-r = requests.get(url = baseurl+"/config")
+r = requests.get(url = baseurl+"/config", verify=False)
 jsondata = r.json()
 if jsondata["swversion"]<"1948086000": #Check if the bridge supports streaming via API v1/v2
     sys.exit("ERROR: Firmware software version on the bridge is outdated and does not support streaming on APIv1/v2. Upgrade it using Hue app. Software version must be 1.XX.194808600 or greater.")
